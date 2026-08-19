@@ -1,8 +1,6 @@
-# SC4 BAT Image Generator
+# Image to SC4Model Generator
 
 レンダリング済みの建物画像から、SimCity 4 の BAT 形式に近い `.SC4Model` を生成するための Python ツールです。
-
-4方向・5ズーム分のモデル用 OBJ とテクスチャを生成し、S3D / FSH / DBPF を組み立てて、最終的な SC4Model を作成します。3ds Max BAT 環境や `fshgen` は不要です。
 
 ## 主な機能
 
@@ -24,26 +22,6 @@
 ```bash
 pip install pillow
 ```
-
-## ファイル構成
-
-### `sc4_i2b_model_generator.py`
-
-メインの BAT モデル生成スクリプトです。
-
-OBJ と Day / Night テクスチャを生成し、`mini_fshgen_qfs.py` を呼び出して最終的な SC4Model を作成します。
-
-### `mini_fshgen_qfs.py`
-
-このプロジェクトで必要な範囲に絞って、fshgen / scdbpf 相当の処理を Python で実装した補助スクリプトです。
-
-主に以下を実装しています。
-
-- OBJ -> S3D
-- PNG -> DXT1 FSH
-- DBPF 生成
-- QFS / RefPack 圧縮
-- DIR リソース生成
 
 ## 使い方
 
