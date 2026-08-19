@@ -58,9 +58,9 @@ output/
 
 ```text
 +-------+-------+
-| North | East  |
+| North | West  |
 +-------+-------+
-| South | West  |
+| South | East  |
 +-------+-------+
 ```
 
