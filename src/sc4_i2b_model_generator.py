@@ -1140,6 +1140,64 @@ def make_preview_icon_from_full_image(full_img, size: int = 64, alpha_threshold:
     return bg
 
 
+def make_sc4_menu_icon_png_bytes(full_img, alpha_threshold: int = 32) -> bytes | None:
+    """
+    Build the 176x44 SC4 menu icon strip (four 44x44 states) from the
+    generated Day preview. Returns None when no Day source is available.
+    """
+    if full_img is None:
+        return None
+
+    try:
+        from PIL import Image, ImageEnhance
+    except ImportError as e:
+        raise RuntimeError(
+            "SC4 menu icon generation requires Pillow. Install with: pip install pillow"
+        ) from e
+
+    bbox = alpha_bbox(
+        full_img,
+        threshold=alpha_threshold,
+        largest_component_only=True,
+        pad=2,
+    )
+    crop = full_img.crop(bbox).convert("RGBA")
+    if crop.width <= 0 or crop.height <= 0:
+        return None
+
+    inner_w = 38
+    inner_h = 38
+    scale = min(
+        inner_w / max(crop.width, 1),
+        inner_h / max(crop.height, 1),
+    )
+    nw = max(1, int(round(crop.width * scale)))
+    nh = max(1, int(round(crop.height * scale)))
+    resized = crop.resize((nw, nh), Image.Resampling.LANCZOS)
+
+    normal = Image.new("RGBA", (44, 44), (188, 188, 188, 255))
+    x = (44 - nw) // 2
+    y = 42 - nh
+    normal.alpha_composite(resized, (x, y))
+
+    # Four SC4 menu states. Reuse the same artwork with modest brightness
+    # differences for normal/hover/pressed/disabled.
+    states = [
+        normal,
+        ImageEnhance.Brightness(normal).enhance(1.12),
+        ImageEnhance.Brightness(normal).enhance(0.82),
+        ImageEnhance.Brightness(normal).enhance(0.60),
+    ]
+
+    strip = Image.new("RGBA", (176, 44), (188, 188, 188, 255))
+    for i, state in enumerate(states):
+        strip.alpha_composite(state, (i * 44, 0))
+
+    bio = io.BytesIO()
+    strip.save(bio, format="PNG")
+    return bio.getvalue()
+
+
 def save_preview_debug_images(out_dir: Path, day_icon, night_icon):
     saved = []
     if day_icon is not None:
@@ -1351,6 +1409,15 @@ def main():
         help="Run mini_fshgen.py import automatically, then patch the generated SC4Model.",
     )
     ap.add_argument(
+        "--generate-ploppable",
+        action="store_true",
+        help=(
+            "Generate --out/<model-name>_Ploppable.dat using the landmark preset. "
+            "Existing --gid/--width/--depth/--height/--model-name values are reused. "
+            "When a Day source is supplied, the generated preview is used as the SC4 menu icon."
+        ),
+    )
+    ap.add_argument(
         "--mini-fshgen",
         type=Path,
         default=Path(__file__).with_name("mini_fshgen_qfs.py"),
@@ -1484,6 +1551,16 @@ def main():
     preview_night_icon = make_preview_icon_from_full_image(preview_night_full, alpha_threshold=args.alpha_threshold)
     manifest["preview_debug_images"] = save_preview_debug_images(args.out, preview_day_icon, preview_night_icon)
 
+    menu_icon_png_bytes = make_sc4_menu_icon_png_bytes(
+        preview_day_full,
+        alpha_threshold=args.alpha_threshold,
+    )
+    if menu_icon_png_bytes is not None:
+        menu_icon_debug_path = args.out / "menu_icon_176x44.png"
+        menu_icon_debug_path.write_bytes(menu_icon_png_bytes)
+        manifest["menu_icon"] = menu_icon_debug_path.name
+        print(f"Generated SC4 menu icon: {menu_icon_debug_path}")
+
     target_sc4model = None
     if args.run_fshgen:
         target_sc4model = run_fshgen_import(args.out, args.model_name, gid, args.mini_fshgen)
@@ -1506,6 +1583,45 @@ def main():
         )
         manifest["patched_sc4model"] = str(target_sc4model)
         print(f"Patched SC4Model with preview BMP/JFIF and XML: {target_sc4model}")
+
+    if args.generate_ploppable:
+        if target_sc4model is None:
+            target_sc4model = args.out / f"{args.model_name}.SC4Model"
+        if not target_sc4model.is_file():
+            ap.error(
+                "--generate-ploppable requires the SC4Model to exist at "
+                f"{target_sc4model}. Use --run-fshgen to build it automatically."
+            )
+
+        try:
+            from make_ploppable_dat import generate_ploppable_dat
+        except ImportError as exc:
+            ap.error(
+                "--generate-ploppable requires make_ploppable_dat.py beside "
+                f"sc4_i2b_model_generator.py ({exc})"
+            )
+
+        ploppable_path = args.out / f"{args.model_name}_Ploppable.dat"
+        try:
+            ploppable_result = generate_ploppable_dat(
+                ploppable_path,
+                gid=int(gid, 16),
+                width=args.width,
+                height=args.height,
+                depth=args.depth,
+                name=args.model_name,
+                icon_png_bytes=menu_icon_png_bytes,
+            )
+        except Exception as exc:
+            ap.error(f"failed to generate ploppable DAT: {exc}")
+
+        manifest["generated_ploppable"] = str(ploppable_result.output_path)
+        manifest["ploppable_menu_icon_source"] = (
+            "generated Day preview"
+            if menu_icon_png_bytes is not None
+            else "placeholder"
+        )
+        print(f"Generated ploppable DAT: {ploppable_result.output_path}")
 
     manifest_path.write_text(json.dumps(manifest, indent=2), encoding="utf-8")
     readme = f"""Standalone BAT4Blender-style OBJ output
@@ -1542,6 +1658,11 @@ Important:
     88777601 / GID / 00030000  (SC4PLUGINDESC XML)
 - The inserted previews are simple 64x64 images intended only to populate the unused BAT preview slots.
 - If --run-fshgen is used, the script calls mini_fshgen.py, builds the SC4Model in --out, and patches it automatically.
+- If --generate-ploppable is used, the script also creates {args.model_name}_Ploppable.dat.
+- --generate-ploppable reuses --gid, --width, --depth, --height and --model-name; no extra lot arguments are required.
+- When a Day source exists, a 176x44 SC4 menu icon is generated from the Zoom 5/North preview and embedded in the Ploppable DAT.
+- The same icon is saved as menu_icon_176x44.png for inspection.
+- make_ploppable_dat.py must be beside sc4_i2b_model_generator.py.
 - Use --mini-fshgen if mini_fshgen.py is not beside this generator script.
 - If --make-templates is used, 00030000_Template.png-style files show the exact projected LOD position in the full canvas.
 - manifest.json also records building_bbox_px and projected_vertices_px.
