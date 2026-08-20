@@ -1,6 +1,6 @@
 # Image to SC4Model Generator
 
-レンダリング済みの建物画像から、SimCity 4 の BAT 形式に近い `.SC4Model` およびそれを使用する Ploppable .dat を生成するための Python ツールです。
+レンダリング済みの建物画像から、SimCity 4 の BAT 形式に近い `.SC4Model` およびそれを使用する Ploppable `.dat` を生成するための Python ツールです。
 
 ## 主な機能
 
