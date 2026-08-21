@@ -34,7 +34,7 @@ python sc4_i2b_model_generator.py \
   --out output \
   --quad-image day.png \
   --quad-night-image night.png \
-  --run-fshgen
+  --run-fshgen \
   --generate-ploppable
 ```
 
