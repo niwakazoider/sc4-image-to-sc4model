@@ -1,0 +1,48 @@
+{
+  "schema_version": 1,
+  "id": "landmark",
+  "name": "Landmark",
+  "building": {
+    "wealth": 0,
+    "pollution_center": [1, 1, 15, 0],
+    "pollution_radii": [1.0, 2.0, 0.0, 0.0],
+    "power_consumed": 60,
+    "water_consumed": 0,
+    "flammability": 10,
+    "max_fire_stage": 1,
+    "query_exemplar_guid": "0x2A56675C",
+    "exemplar_category": "0x2C8FBC6C",
+    "query_sound": "0x0A8C9EF0",
+    "plop_sound": "0x6A5EC589",
+    "building_foundation": "0x00000000",
+    "occupant_groups": ["0x0000150A", "0x00001920", "0x00001935"],
+    "plop_cost": 110,
+    "bulldoze_cost": 100,
+    "landmark_effect": {"magnitude": 40, "radius": 20 },
+    "park_effect": null,
+    "mayor_rating_effect": {"magnitude": 10, "radius": 256},
+    "budget": {
+      "enabled": true,
+      "department": "0x2A5A723F",
+      "line": "0x00000000",
+      "purpose": "0xAA59670C",
+      "monthly_cost": 150
+    }
+  },
+  "lot": {
+    "growth_stage": 100,
+    "required_roads": 8,
+    "min_slope": 0.0,
+    "max_slope_before": 0.0,
+    "max_slope": 50.0,
+    "version": 2,
+    "zone_types": [15],
+    "wealth_types": [0],
+    "purpose_types": [0],
+    "base_texture": "0x258F2000",
+    "retaining_wall": "0xC96D2135",
+    "building_foundation": "0x890B7315",
+    "unknown_cbe243f7": 1,
+    "do_construction": 0
+  }
+}

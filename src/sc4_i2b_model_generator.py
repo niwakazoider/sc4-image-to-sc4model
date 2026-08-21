@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Standalone SC4 BAT-style ground-safe camera-plane OBJ generator for memo33/fshgen.
+Standalone SC4 BAT-style OBJ generator for memo33/fshgen.
 
 Goal
 ----
@@ -1412,9 +1412,18 @@ def main():
         "--generate-ploppable",
         action="store_true",
         help=(
-            "Generate --out/<model-name>_Ploppable.dat using the landmark preset. "
+            "Generate --out/<model-name>_Ploppable.dat. "
             "Existing --gid/--width/--depth/--height/--model-name values are reused. "
             "When a Day source is supplied, the generated preview is used as the SC4 menu icon."
+        ),
+    )
+    ap.add_argument(
+        "--preset",
+        default="landmark",
+        choices=("landmark", "park", "plaza", "garden"),
+        help=(
+            "Preset used with --generate-ploppable "
+            "(default: landmark)"
         ),
     )
     ap.add_argument(
@@ -1610,6 +1619,7 @@ def main():
                 height=args.height,
                 depth=args.depth,
                 name=args.model_name,
+                preset=args.preset,
                 icon_png_bytes=menu_icon_png_bytes,
             )
         except Exception as exc:

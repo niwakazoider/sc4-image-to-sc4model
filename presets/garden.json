@@ -1,0 +1,42 @@
+{
+  "schema_version": 1,
+  "id": "garden",
+  "name": "Garden",
+  "building": {
+    "wealth": 0,
+    "pollution_center": [0, 0, 0, 0],
+    "pollution_radii": [0.0, 0.0, 0.0, 0.0],
+    "power_consumed": 0,
+    "water_consumed": 5,
+    "flammability": 10,
+    "max_fire_stage": 1,
+    "query_exemplar_guid": null,
+    "exemplar_category": null,
+    "query_sound": null,
+    "plop_sound": null,
+    "building_foundation": "0x00000000",
+    "occupant_groups": ["0x00001005", "0x00001006"],
+    "plop_cost": 60,
+    "bulldoze_cost": 10,
+    "landmark_effect": {"magnitude": 20, "radius": 10},
+    "park_effect": {"magnitude": 50, "radius": 15},
+    "mayor_rating_effect": null,
+    "budget": {"enabled": false}
+  },
+  "lot": {
+    "growth_stage": 100,
+    "required_roads": 8,
+    "min_slope": 0.0,
+    "max_slope_before": 0.0,
+    "max_slope": 50.0,
+    "version": 2,
+    "zone_types": [15],
+    "wealth_types": [0],
+    "purpose_types": [0],
+    "base_texture": "0x252B1000",
+    "retaining_wall": "0xC96D2135",
+    "building_foundation": "0x890B7315",
+    "unknown_cbe243f7": 1,
+    "do_construction": 0
+  }
+}

@@ -35,7 +35,8 @@ python sc4_i2b_model_generator.py \
   --quad-image day.png \
   --quad-night-image night.png \
   --run-fshgen \
-  --generate-ploppable
+  --generate-ploppable \
+  --preset landmark
 ```
 
 生成結果の例:
@@ -115,6 +116,15 @@ Plugins/
 ```
 
 `--gid`, `--width`, `--height`, `--depth`, `--name` が必須です。
+
+### プリセット
+
+landmark, park, plaza, garden
+
+```bash
+--preset park
+```
+
 
 ### Lot
 
